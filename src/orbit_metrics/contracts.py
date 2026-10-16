@@ -20,10 +20,19 @@ from orbit.diagnostics import MetricSnapshot
 
 @runtime_checkable
 class MetricsExporter(Protocol):
-    """Convert detached Core metric snapshots into an adapter-defined representation."""
+    """Convert detached Core metric snapshots into one adapter-defined text representation.
+
+    Implementations choose their exposition format and own escaping, aggregation, cardinality,
+    transport, and output-size policies. The input tuple and snapshots are read-only contract
+    values; an exporter should not retain them or mutate any nested data.
+    """
 
     def export(self, snapshots: tuple[MetricSnapshot, ...]) -> str:
-        """Serialize snapshots without mutating them or retaining application-owned state."""
+        """Return encoded samples without mutating or retaining the supplied snapshots.
+
+        Raise an adapter-specific, sanitized error when a snapshot cannot be represented. Do not
+        silently change metric type, labels, units, or counter/gauge semantics while encoding.
+        """
 
 
 __all__ = ["MetricsExporter"]

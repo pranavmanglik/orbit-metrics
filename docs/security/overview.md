@@ -1,17 +1,26 @@
-# Orbit Metrics: security
+# Security
 
-## Package-specific security guidance
+## Metric data
 
-The README does not define separate package-specific security guarantees. Follow the implemented API and provider documentation; do not infer security properties that are not documented and tested.
+Metric names and labels can disclose internal architecture, tenant identifiers, user activity, or
+business operations. Use bounded, reviewed labels and avoid credentials, access tokens, personal
+data, request bodies, raw exception messages, and user-controlled values. Do not assume that a
+metric is harmless because it is numeric; labels and names often carry the sensitive context.
 
-## Credentials and sensitive data
+This capability does not inspect or sanitize samples. An exporter must escape text according to
+its output format and apply any destination-specific restrictions. Treat snapshot names, kinds,
+labels, and values according to the Core contract and do not build unsafe exposition by string
+concatenation.
 
-Use least-privilege credentials and a secret manager for provider secrets. Do not commit secrets, tokens, private keys, personal data, request bodies, raw provider errors, or opaque cursors. Enable TLS certificate verification for remote services unless package documentation gives a narrowly scoped local-development exception.
+## Endpoint and backend access
 
-## Vulnerability disclosure
+This package opens no network listener and defines no authentication or transport. The selected
+adapter and deployment own authorization, TLS, credential storage, endpoint exposure, retention,
+and network restrictions. Keep scrape or push endpoints on trusted paths, use least-privilege
+credentials, verify TLS certificates, and avoid logging complete exported payloads.
 
-Follow the repository [security policy](../../SECURITY.md). Do not post vulnerability details in public issues. The policy describes private reporting alternatives without claiming that a hosting-platform setting is enabled.
+## Vulnerability reporting
 
-## Limits
-
-This page records source and package documentation, not an independent security audit. Validate the package, its provider SDKs, and its deployment configuration before production use.
+Report suspected vulnerabilities through the private process described in the repository
+[security policy](../../SECURITY.md). Avoid posting exploit details publicly before maintainers can
+assess the issue.

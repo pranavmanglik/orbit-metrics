@@ -1,22 +1,33 @@
-# Orbit Metrics: operations and security
+# Operations
 
-This guide organizes runtime behavior documented by the package. It does not certify production readiness. Verify provider/client versions, permissions, transport security, limits, and failure behavior in the target environment before release.
+This package contains no exporter or runtime endpoint. Install and configure a separate adapter,
+then pass its exporter the detached snapshots defined by Core. The adapter owns initialization,
+flush and shutdown behavior, network calls, retries, and operational health reporting.
 
-## Configuration surface
+## Prometheus exposition
 
-Environment names found in the package README:
+For Prometheus, use `orbit-metrics-prometheus` and follow its endpoint guide. Exposition and an
+ASGI `/metrics` route are opt-in. Decide whether the scrape endpoint is reachable only from the
+trusted monitoring network, whether it needs authentication at the ingress, and how it behaves
+during application startup and shutdown. Scrape endpoints can reveal application and infrastructure
+details even when they expose no credentials.
 
-The package README does not name `ORBIT_*` variables. Use its typed constructors and application configuration, and confirm exact runtime inputs in the implementation before deployment.
+## Metric correctness
 
-Use the package README's constructor and deployment examples. Store credentials in a secret manager and avoid logging credentials, raw provider errors, request data, or opaque cursors.
+Before enabling an exporter, verify how it maps each Core metric kind, names, labels, units, and
+numeric values. Avoid label values derived from user IDs, request paths, exception messages, or
+other unbounded input. High cardinality increases memory and backend cost and can make metrics
+unavailable. Prefer bounded dimensions and put event-level detail in an appropriately protected
+logs or traces system.
 
-## Lifecycle, failure behavior, and limits
+For pull exporters, test scrape concurrency, response limits, timeout behavior, and collection
+overlap. For push exporters, test batching, bounded queues, backpressure, retries, duplicate sends,
+flush deadlines, shutdown, and behavior while the backend is unavailable. This protocol does not
+define delivery guarantees or a global timeout.
 
-`orbit-metrics` defines the provider-independent exporter contract for Orbit Core metric
-snapshots. It does not collect metric data itself: Core owns bounded instruments and snapshots,
-while adapters implement this interface to expose or transport them. The distribution requires
-Python 3.11 through 3.14 and is currently pre-alpha.
+## Release checks
 
-## Production validation
-
-Validate startup/shutdown cleanup, timeout and cancellation behavior, concurrency and payload bounds where applicable, secret rotation and least-privilege access, data durability, backup/restore, and failover against the selected provider. Do not infer distributed or durable guarantees from an in-process API or fake-client tests.
+Test representative counter, gauge, and other supported sample forms; escaping and invalid text;
+empty snapshots; large snapshots; repeated export; and concurrent export. Use a dedicated
+non-production collector for integration checks. Protocol conformance and unit tests do not prove
+that a remote backend received or interpreted samples correctly.

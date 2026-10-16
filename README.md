@@ -3,7 +3,7 @@
 `orbit-metrics` defines the provider-independent exporter contract for Orbit Core metric
 snapshots. It does not collect metric data itself: Core owns bounded instruments and snapshots,
 while adapters implement this interface to expose or transport them. The distribution requires
-Python 3.11 through 3.14 and is currently pre-alpha.
+Python 3.11 through 3.14 and is currently alpha.
 
 ## Implementing an exporter
 
